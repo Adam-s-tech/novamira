@@ -14,6 +14,7 @@ if (!function_exists('set_transient')) {
     function set_transient(string $key, mixed $value, int $ttl = 0): bool
     {
         $GLOBALS['nm_transients'][$key] = $value;
+        $GLOBALS['nm_transient_ttls'][$key] = $ttl;
         return true;
     }
 }
@@ -61,5 +62,23 @@ final class EndpointRateLimitTest extends TestCase
         for ($i = 0; $i < ENDPOINT_RATE_LIMIT_PER_MINUTE + 5; $i++) {
             self::assertTrue(within_endpoint_rate_limit('token', ''));
         }
+    }
+
+    public function testWindowExpiresFromFirstRequestRatherThanLastPoll(): void
+    {
+        $GLOBALS['nm_transients'] = [];
+        $key = 'novamira_oauth_rl_token_' . hash('sha256', '203.0.113.5');
+
+        self::assertTrue(within_endpoint_rate_limit('token', '203.0.113.5'));
+        self::assertSame(MINUTE_IN_SECONDS, $GLOBALS['nm_transient_ttls'][$key]);
+
+        $GLOBALS['nm_transients'][$key]['started_at'] = time() - 30;
+        self::assertTrue(within_endpoint_rate_limit('token', '203.0.113.5'));
+        self::assertSame(30, $GLOBALS['nm_transient_ttls'][$key]);
+
+        $GLOBALS['nm_transients'][$key] = ['started_at' => time() - MINUTE_IN_SECONDS, 'count' => ENDPOINT_RATE_LIMIT_PER_MINUTE];
+        self::assertTrue(within_endpoint_rate_limit('token', '203.0.113.5'));
+        self::assertSame(1, $GLOBALS['nm_transients'][$key]['count']);
+        self::assertSame(MINUTE_IN_SECONDS, $GLOBALS['nm_transient_ttls'][$key]);
     }
 }

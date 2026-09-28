@@ -249,11 +249,27 @@ function within_endpoint_rate_limit(string $bucket, string $client_ip): bool
         return true;
     }
     $key = 'novamira_oauth_rl_' . $bucket . '_' . hash('sha256', $client_ip);
-    $current = (int) get_transient($key);
-    if ($current >= ENDPOINT_RATE_LIMIT_PER_MINUTE) {
+    $now = time();
+    // @mago-expect analysis:mixed-assignment
+    $window = get_transient($key);
+    if (
+        !is_array($window)
+        || !is_int($window['started_at'] ?? null)
+        || !is_int($window['count'] ?? null)
+        || $window['started_at'] > $now
+        || ($now - $window['started_at']) >= MINUTE_IN_SECONDS
+    ) {
+        $window = ['started_at' => $now, 'count' => 0];
+    }
+    if ($window['count'] >= ENDPOINT_RATE_LIMIT_PER_MINUTE) {
         return false;
     }
-    set_transient($key, $current + 1, MINUTE_IN_SECONDS);
+    // Keep the expiry anchored to the first request, not extended by every poll.
+    set_transient(
+        $key,
+        ['started_at' => $window['started_at'], 'count' => $window['count'] + 1],
+        max(1, MINUTE_IN_SECONDS - ($now - $window['started_at'])),
+    );
     return true;
 }
 

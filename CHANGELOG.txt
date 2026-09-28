@@ -1,3 +1,6 @@
+Unreleased
+* Fix: Device-code sign-in can now keep waiting for approval when a client polls at the advertised interval, instead of reaching the site's request limit after a few minutes.
+
 v1.12.6 - 2026/09/28
 * Tweak: The sandbox safe mode notice now explains in plain words what happened and includes a ready-to-paste prompt for your AI to fix the problem, with a link to the Sandbox page for those who prefer to do it by hand.
 * Fix: Troubleshoot now recognizes when a real .well-known directory with its own .htaccess file keeps the OAuth discovery addresses from reaching WordPress, and shows the rewrite rule to add to that file, where it previously pointed at caches and firewalls.
