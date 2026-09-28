@@ -35,7 +35,7 @@ function set_pending_reload_notice(): void
  */
 function render(): void
 {
-    if (!Admin\current_user_can_manage()) {
+    if (!\novamira_current_user_can_manage() || !\novamira_admin_ui_visible()) {
         return;
     }
 

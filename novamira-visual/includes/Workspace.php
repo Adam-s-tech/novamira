@@ -64,7 +64,7 @@ class Workspace
         $workspace_url = $this->get_workspace_url();
 
         \wp_send_json_success([
-            'authenticated' => $can_manage,
+            'authenticated' => $can_manage && \novamira_admin_ui_visible(),
             'loggedIn' => $logged_in,
             'canManage' => $can_manage,
             'recoverUrl' => $logged_in ? $workspace_url : \wp_login_url($workspace_url),

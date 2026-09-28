@@ -47,4 +47,19 @@ class WP_CLI
     public static function warning($message)
     {
     }
+
+    /**
+     * @param string $message
+     */
+    public static function line($message = '')
+    {
+    }
+
+    /**
+     * @param string $question
+     * @param array<string, mixed> $assoc_args
+     */
+    public static function confirm($question, $assoc_args = [])
+    {
+    }
 }

@@ -98,7 +98,7 @@ function novamira_register_wordpress_compatibility_notice(): void
  */
 function novamira_render_wordpress_compatibility_notice(): void
 {
-    if (!novamira_current_user_can_manage()) {
+    if (!novamira_current_user_can_manage() || !novamira_admin_ui_visible()) {
         return;
     }
 

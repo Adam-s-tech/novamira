@@ -135,7 +135,7 @@ function novamira_sandbox_crash_handler(string $crashed_file, ?string $current_s
 
     // Dashboard warnings.
     add_action('admin_notices', static function () use ($crashed_file) {
-        if (!novamira_current_user_can_manage()) {
+        if (!novamira_current_user_can_manage() || !novamira_admin_ui_visible()) {
             return;
         }
         if (file_exists($crashed_file)) {

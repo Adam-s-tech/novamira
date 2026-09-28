@@ -52,7 +52,7 @@ function regressions(): array
 
 function maybe_render(): void
 {
-    if (!\novamira_current_user_can_manage()) {
+    if (!\novamira_current_user_can_manage() || !\novamira_admin_ui_visible()) {
         return;
     }
     $found = regressions();

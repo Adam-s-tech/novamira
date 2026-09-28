@@ -33,6 +33,11 @@ final class AdminNoticesTest extends TestCase
                 return true;
             }
 
+            function novamira_admin_ui_visible(): bool
+            {
+                return true;
+            }
+
             function sanitize_key(string $key): string
             {
                 return strtolower((string) preg_replace('/[^a-zA-Z0-9_\-]/', '', $key));

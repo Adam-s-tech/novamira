@@ -255,6 +255,25 @@ function novamira_render_uninstall_review_page(): void
                 <?php endif; ?>
             </div>
 
+            <?php if (get_site_option('novamira_ghost_mode', default_value: false) !== false): ?>
+                <div class="card" style="max-width:760px; margin-top:20px;">
+                    <h2><?php esc_html_e('Ghost Mode', domain: 'novamira'); ?></h2>
+                    <p>
+                        <label>
+                            <input type="checkbox" name="delete_ghost_mode" value="1">
+                            <?php esc_html_e(
+                                'When Novamira is deleted, remove Ghost Mode settings',
+                                domain: 'novamira',
+                            ); ?>
+                        </label>
+                    </p>
+                    <p class="description"><?php esc_html_e(
+                        'Kept by default, so reinstalling Novamira restores the same Ghost Mode.',
+                        domain: 'novamira',
+                    ); ?></p>
+                </div>
+            <?php endif; ?>
+
             <?php submit_button(__('Save choices and deactivate Novamira', domain: 'novamira')); ?>
         </form>
         <script>
@@ -311,6 +330,7 @@ function novamira_handle_prepare_uninstall(): void
         'delete_memories' => array_key_exists('delete_memories', $_POST),
         'delete_user_skills' => array_key_exists('delete_user_skills', $_POST),
         'delete_chat_sessions' => array_key_exists('delete_chat_sessions', $_POST),
+        'delete_ghost_mode' => array_key_exists('delete_ghost_mode', $_POST),
     ]);
 
     if (!function_exists('deactivate_plugins')) {

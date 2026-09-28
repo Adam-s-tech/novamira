@@ -52,6 +52,13 @@ final class UninstallDataTest extends TestCase
         self::assertContains('novamira_chat_schema_version', $result['deleted_options']);
     }
 
+    public function testGhostModeSettingsSurviveUninstallUnlessChosen(): void
+    {
+        self::assertNotContains('novamira_ghost_mode', $this->runUninstall(null)['deleted_options']);
+        self::assertNotContains('novamira_ghost_mode', $this->runUninstall(['delete_ghost_mode' => false])['deleted_options']);
+        self::assertContains('novamira_ghost_mode', $this->runUninstall(['delete_ghost_mode' => true])['deleted_options']);
+    }
+
     /**
      * @param array<string, bool>|null $plan
      * @return array{queries: list<string>, deleted_posts: list<int>, deleted_options: list<string>}
@@ -111,7 +118,7 @@ final class UninstallDataTest extends TestCase
 
             function delete_site_option(string $name): void
             {
-                unset($name);
+                $GLOBALS['events']['deleted_options'][] = $name;
             }
 
             function delete_option(string $name): void

@@ -12,7 +12,7 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
 const NOVAMIRA_UNINSTALL_PLAN_OPTION = 'novamira_uninstall_plan';
 
 /**
- * @return array{delete_oauth: bool, delete_application_passwords: bool, delete_memories: bool, delete_user_skills: bool, delete_chat_sessions: bool}
+ * @return array{delete_oauth: bool, delete_application_passwords: bool, delete_memories: bool, delete_user_skills: bool, delete_chat_sessions: bool, delete_ghost_mode: bool}
  */
 function novamira_uninstall_plan(): array
 {
@@ -31,11 +31,12 @@ function novamira_uninstall_plan(): array
         // Preserve the legacy behavior only when no explicit Chat cleanup choice was stored.
         'delete_chat_sessions' => !array_key_exists('delete_chat_sessions', $stored)
             || $stored['delete_chat_sessions'] === true,
+        'delete_ghost_mode' => ($stored['delete_ghost_mode'] ?? false) === true,
     ];
 }
 
 /**
- * @param array{delete_oauth: bool, delete_application_passwords: bool, delete_memories: bool, delete_user_skills: bool, delete_chat_sessions: bool} $plan
+ * @param array{delete_oauth: bool, delete_application_passwords: bool, delete_memories: bool, delete_user_skills: bool, delete_chat_sessions: bool, delete_ghost_mode: bool} $plan
  */
 function novamira_uninstall_current_site(array $plan): void
 {
@@ -180,9 +181,15 @@ if (is_multisite()) {
         novamira_uninstall_current_site($novamira_uninstall_plan);
         restore_current_blog();
     }
+    if ($novamira_uninstall_plan['delete_ghost_mode']) {
+        delete_site_option('novamira_ghost_mode');
+    }
     delete_site_option(NOVAMIRA_UNINSTALL_PLAN_OPTION);
     return;
 }
 
 novamira_uninstall_current_site($novamira_uninstall_plan);
+if ($novamira_uninstall_plan['delete_ghost_mode']) {
+    delete_site_option('novamira_ghost_mode');
+}
 delete_site_option(NOVAMIRA_UNINSTALL_PLAN_OPTION);

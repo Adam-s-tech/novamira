@@ -86,6 +86,12 @@ if (!function_exists('novamira_current_user_can_manage')) {
         return (bool) ($GLOBALS['novamira_test_current_user_can_manage'] ?? false);
     }
 }
+if (!function_exists('novamira_admin_ui_visible')) {
+    function novamira_admin_ui_visible(): bool
+    {
+        return true;
+    }
+}
 if (!function_exists('wp_admin_notice')) {
     /** @param array<string, mixed> $args */
     function wp_admin_notice(string $message, array $args = []): void

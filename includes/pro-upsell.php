@@ -142,7 +142,7 @@ add_filter(
 );
 
 add_action('admin_footer', static function (): void {
-    if (!novamira_current_user_can_manage()) {
+    if (!novamira_current_user_can_manage() || !novamira_admin_ui_visible()) {
         return;
     }
     ?>
@@ -178,7 +178,7 @@ add_action('admin_notices', callback: 'novamira_render_pro_welcome_notice');
 
 function novamira_render_pro_welcome_notice(): void
 {
-    if (!novamira_current_user_can_manage()) {
+    if (!novamira_current_user_can_manage() || !novamira_admin_ui_visible()) {
         return;
     }
     if (novamira_pro_is_active()) {

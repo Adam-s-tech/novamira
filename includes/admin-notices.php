@@ -62,6 +62,10 @@ function novamira_render_persistent_admin_notice(
     string $dismiss_value = '1',
     array $args = [],
 ): void {
+    if (!novamira_current_user_can_manage() || !novamira_admin_ui_visible()) {
+        return;
+    }
+
     if ((string) get_user_meta(get_current_user_id(), $meta_key, single: true) === $dismiss_value) {
         return;
     }

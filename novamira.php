@@ -133,7 +133,7 @@ function novamira_is_mcp_adapter_available(): bool
  */
 function novamira_render_mcp_dependency_notice(): void
 {
-    if (!novamira_current_user_can_manage()) {
+    if (!novamira_current_user_can_manage() || !novamira_admin_ui_visible()) {
         return;
     }
 
@@ -236,6 +236,7 @@ add_action('network_admin_notices', callback: 'novamira_render_mcp_dependency_no
 add_action('rest_api_init', callback: 'novamira_register_missing_mcp_endpoint', priority: 999);
 
 require_once __DIR__ . '/includes/helpers.php';
+require_once __DIR__ . '/includes/ghost-mode/bootstrap.php';
 require_once __DIR__ . '/includes/design-authority.php';
 require_once __DIR__ . '/includes/features/bootstrap.php';
 require_once __DIR__ . '/includes/admin-notices.php';
@@ -379,7 +380,7 @@ add_filter('novamira_discover_abilities_instructions', callback: 'novamira_injec
  */
 function novamira_register_admin_bar_toggle(\WP_Admin_Bar $wp_admin_bar): void
 {
-    if (!novamira_current_user_can_manage()) {
+    if (!novamira_current_user_can_manage() || !novamira_admin_ui_visible()) {
         return;
     }
 
@@ -456,7 +457,7 @@ function novamira_register_admin_bar_toggle(\WP_Admin_Bar $wp_admin_bar): void
  */
 function novamira_render_admin_bar_toggle_assets(): void
 {
-    if (!novamira_current_user_can_manage() || !is_admin_bar_showing()) {
+    if (!novamira_current_user_can_manage() || !novamira_admin_ui_visible() || !is_admin_bar_showing()) {
         return;
     }
 
@@ -676,7 +677,7 @@ $is_enabled = novamira_is_enabled();
 
 if (!$is_enabled && novamira_is_domain_mismatch()) {
     add_action('admin_notices', static function () {
-        if (!novamira_current_user_can_manage()) {
+        if (!novamira_current_user_can_manage() || !novamira_admin_ui_visible()) {
             return;
         }
         /** @var string $locked */
