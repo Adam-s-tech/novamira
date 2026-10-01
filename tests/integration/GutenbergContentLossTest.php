@@ -75,7 +75,7 @@ final class GutenbergContentLossTest extends TestCase
             4,
         );
         $emptyImages = str_repeat(
-            "<!-- wp:image -->\n<figure class=\"wp-block-image\"></figure>\n<!-- /wp:image -->\n",
+            "<!-- wp:image -->\n<figure class=\"wp-block-image\"><img alt=\"\"/></figure>\n<!-- /wp:image -->\n",
             4,
         );
 
@@ -84,6 +84,35 @@ final class GutenbergContentLossTest extends TestCase
         self::assertNotNull($report);
         self::assertSame(4, $report['media_before']);
         self::assertSame(0, $report['media_after']);
+    }
+
+    public function testImagesLeftWithoutSourceAreReportedOnShortPages(): void
+    {
+        $live = "<!-- wp:image {\"id\":5} -->\n<figure class=\"wp-block-image\"><img src=\"a.jpg\" alt=\"\" class=\"wp-image-5\"/></figure>\n<!-- /wp:image -->\n";
+        $candidate = "<!-- wp:image {\"id\":5} -->\n<figure class=\"wp-block-image\"><img alt=\"\" class=\"wp-image-5\"/></figure>\n<!-- /wp:image -->\n";
+
+        $report = content_loss_report(str_repeat($live, 2), str_repeat($candidate, 2));
+
+        self::assertNotNull($report);
+        self::assertSame(2, $report['media_before']);
+        self::assertSame(0, $report['media_after']);
+    }
+
+    public function testRemovingOneOrTwoImagesIsNotReported(): void
+    {
+        $image = "<!-- wp:image -->\n<figure class=\"wp-block-image\"><img src=\"a.jpg\" alt=\"\"/></figure>\n<!-- /wp:image -->\n";
+        $text = self::paragraphs(10);
+
+        self::assertNull(content_loss_report($text . $image, $text));
+        self::assertNull(content_loss_report($text . $image . $image, $text));
+    }
+
+    public function testInvalidUtf8DoesNotDisableTheTextGuard(): void
+    {
+        $live = self::paragraphs(20, "Caf\xE9 lorem ipsum dolor sit amet consectetur.");
+
+        self::assertGreaterThan(200, content_visible_text_length($live));
+        self::assertNotNull(content_loss_report($live, self::emptied(20)));
     }
 
     public function testDelimitersScriptsAndEntitiesAreNotText(): void
@@ -98,7 +127,8 @@ final class GutenbergContentLossTest extends TestCase
     public function testMediaCountCoversCommonEmbeds(): void
     {
         $content =
-            '<img src="a.jpg"><video src="b.mp4"></video><audio src="c.mp3"></audio><iframe src="d"></iframe><p>imgx</p>';
+            '<img src="a.jpg"><video src="b.mp4"></video><audio src="c.mp3"></audio><iframe src="d"></iframe><p>imgx</p>'
+            . '<img alt=""><img src="" alt="">';
 
         self::assertSame(4, content_media_count($content));
     }
@@ -114,6 +144,7 @@ final class GutenbergContentLossTest extends TestCase
 
         self::assertStringContainsString('0 of 6338', $message);
         self::assertStringContainsString('allow_content_loss', $message);
+        self::assertStringContainsString('gutenberg-delete-pending-batch', $message);
         self::assertStringContainsString('gutenberg-get-content', $message);
         self::assertStringNotContainsString('—', $message);
         self::assertLessThanOrEqual(300, mb_strlen($message));
@@ -126,6 +157,7 @@ final class GutenbergContentLossTest extends TestCase
         );
 
         self::assertStringContainsString("'allow_content_loss' => [", $source);
+        self::assertStringContainsString('translating or condensing', $source);
         self::assertStringContainsString("(\$input['allow_content_loss'] ?? false) === true", $source);
     }
 
