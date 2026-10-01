@@ -16,6 +16,8 @@ if (!defined('ABSPATH')) {
     exit();
 }
 
+require_once __DIR__ . '/content-loss.php';
+
 const POST_TYPE = 'novamira_gb_change';
 
 const KIND_BATCH = 'batch';
@@ -67,6 +69,8 @@ const META_SERIALIZATION_RUNTIME = '_novamira_gb_serialization_runtime';
 const META_SERIALIZATION_RUNTIME_REASON = '_novamira_gb_serialization_runtime_reason';
 
 const META_FINALIZED_CONTENT = '_novamira_gb_finalized_content';
+
+const META_ALLOW_CONTENT_LOSS = '_novamira_gb_allow_content_loss';
 
 const SERIALIZATION_RUNTIME_IFRAME = 'iframe';
 
@@ -302,6 +306,11 @@ function meta_string(int $post_id, string $key): string
     $value = get_post_meta($post_id, $key, single: true);
 
     return is_scalar($value) ? (string) $value : '';
+}
+
+function item_allows_content_loss(int $item_id): bool
+{
+    return meta_string($item_id, META_ALLOW_CONTENT_LOSS) === '1';
 }
 
 function meta_int(int $post_id, string $key): int
@@ -1630,6 +1639,17 @@ function commit_prepared_items(WP_Post $batch, array $prepared_items): array|WP_
         $base_hash = meta_string($item->ID, META_BASE_CONTENT_HASH);
         if ($base_hash !== '' && !hash_equals($base_hash, content_hash($target->post_content))) {
             return conflict_prepared_item($item);
+        }
+
+        if (!item_allows_content_loss($item->ID)) {
+            $loss = content_loss_report($target->post_content, meta_string($item->ID, META_FINALIZED_CONTENT));
+            if ($loss !== null) {
+                return fail_prepared_item(
+                    $item,
+                    [['message' => content_loss_message($loss)]],
+                    message: 'The change would remove most of the existing content; live content was left unchanged.',
+                );
+            }
         }
     }
 

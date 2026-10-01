@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
 wp_register_ability('novamira/gutenberg-add-pending-change', [
     'label' => __('Add Gutenberg Pending Change', domain: 'novamira'),
     'description' => __(
-        'Adds one replace-content target change to a draft Gutenberg pending batch, or auto-creates a draft batch when batch_id is omitted. Static/native blocks are finalized in a hidden editor iframe so registered third-party blocks can be serialized by their editor JavaScript. Builder-owned block namespaces (for example divi/*) are rejected: write that content with the builder\'s dedicated abilities. Queued changes are not live until gutenberg-enable-batch-finalization marks the batch ready and an open Block Editor Queue page completes it.',
+        'Adds one replace-content target change to a draft Gutenberg pending batch, or auto-creates a draft batch when batch_id is omitted. Static/native blocks are finalized in a hidden editor iframe so registered third-party blocks can be serialized by their editor JavaScript. Builder-owned block namespaces (for example divi/*) are rejected: write that content with the builder\'s dedicated abilities. Queued changes are not live until gutenberg-enable-batch-finalization marks the batch ready and an open Block Editor Queue page completes it. replace-content replaces the whole document: send every block with its full content, not the tree returned by gutenberg-get-content, which omits text stored in block markup.',
         domain: 'novamira',
     ),
     'category' => 'gutenberg',
@@ -64,6 +64,11 @@ wp_register_ability('novamira/gutenberg-add-pending-change', [
                 'description' => 'Set true only to intentionally queue content whose top-level blocks are all raw HTML (core/html or classic). Defaults to false, which refuses such content so you compose with registered blocks instead.',
                 'default' => false,
             ],
+            'allow_content_loss' => [
+                'type' => 'boolean',
+                'description' => 'Set true only when the change is meant to remove most of the existing text or media. Defaults to false: the batch fails before writing if the finalized content keeps less than half of the live text or media.',
+                'default' => false,
+            ],
         ],
         'required' => ['block_spec'],
         'anyOf' => [
@@ -90,7 +95,7 @@ wp_register_ability('novamira/gutenberg-add-pending-change', [
         'show_in_rest' => true,
         'mcp' => ['public' => true],
         'annotations' => [
-            'instructions' => 'Use this for native/static Gutenberg content. Compose with registered blocks (core or third-party) passed as {name, attributes, innerBlocks}, not raw HTML; the queue serializes each block with its own editor JavaScript. If every top-level block is raw HTML (core/html or classic) the ability refuses the write so you recompose with real blocks; only resend with allow_raw_html=true when the raw HTML is genuinely intentional. If no batch_id is supplied, this ability creates a draft batch and adds the first item. Check finalizer_runtime in the response: if online is false, ask the user to open dashboard_url and keep the Block Editor Queue page open while you finish queueing. You may stream finalizer_runtime.sse_url with curl -N or poll finalizer_runtime.poll_url with curl to check whether the page is still open. Continue adding items to the same batch_id, then call gutenberg-enable-batch-finalization. If a Block Editor Queue page is online, enabling the batch should let that page process it automatically. Do not tell the user the changes are live until finalization completes.',
+            'instructions' => 'Use this for native/static Gutenberg content. Compose with registered blocks (core or third-party) passed as {name, attributes, innerBlocks}, not raw HTML; the queue serializes each block with its own editor JavaScript. If every top-level block is raw HTML (core/html or classic) the ability refuses the write so you recompose with real blocks; only resend with allow_raw_html=true when the raw HTML is genuinely intentional. If no batch_id is supplied, this ability creates a draft batch and adds the first item. Check finalizer_runtime in the response: if online is false, ask the user to open dashboard_url and keep the Block Editor Queue page open while you finish queueing. You may stream finalizer_runtime.sse_url with curl -N or poll finalizer_runtime.poll_url with curl to check whether the page is still open. Continue adding items to the same batch_id, then call gutenberg-enable-batch-finalization. If a Block Editor Queue page is online, enabling the batch should let that page process it automatically. Do not tell the user the changes are live until finalization completes. Never resend the gutenberg-get-content tree as block_spec: it omits text, links and image sources stored in block markup, and the batch fails if most existing content would be removed. Set allow_content_loss=true only when the user asked to remove that content.',
             'readonly' => false,
             'destructive' => true,
             'idempotent' => false,
@@ -150,6 +155,10 @@ function gutenberg_add_pending_change(array $input): array|WP_Error
     $item_id = create_item($batch->ID, $target->ID, $target_type, $operation, $blocks);
     if (is_wp_error($item_id)) {
         return $item_id;
+    }
+
+    if (($input['allow_content_loss'] ?? false) === true) {
+        update_post_meta($item_id, META_ALLOW_CONTENT_LOSS, meta_value: '1');
     }
 
     return gutenberg_pending_change_response($batch, $item_id, $target, $target_type);

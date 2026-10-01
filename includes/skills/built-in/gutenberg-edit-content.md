@@ -37,6 +37,14 @@ clients use the standalone Block Editor Queue admin page.
 
 - Use `novamira/gutenberg-get-content` for the target. It reads live
   `post_content`, not queued pending specs.
+- The tree returned by `novamira/gutenberg-get-content` is not a `block_spec`.
+  It carries only the attributes stored in each block comment: paragraph and
+  heading text, links, image sources and similar values that live in the
+  block markup are missing, and blocks deeper than `max_depth` are cut.
+  Sending it back through `replace-content` empties the page. Write every
+  block with its full content; the queue refuses a change that would remove
+  most of the existing text or media unless `allow_content_loss` is set
+  because the user asked for that removal.
 - If `pending_gutenberg_change` is present, inspect the named batch with
   `novamira/gutenberg-get-pending-batch` before editing. Do not stack another
   pending change on the same target unless the user confirms the old batch
