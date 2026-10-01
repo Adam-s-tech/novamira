@@ -61,7 +61,7 @@ add_action('wp_abilities_api_init', __NAMESPACE__ . '\\Abilities\\Delete\\regist
 /**
  * Append the design-authority lines (see includes/design-authority.php): the
  * `novamira-design` skill directive at the `design` level (the default on
- * every site with the feature on, with or without an active design), the
+ * every site with the feature on, noting when a design is active), the
  * builder-owned-design line at the `ask`, `hybrid`, and `builder` levels a
  * specialization declares, and nothing only when the feature is off.
  *

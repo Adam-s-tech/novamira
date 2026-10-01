@@ -20,6 +20,8 @@ final class DesignAuthorityTest extends TestCase
 {
     private const DIRECTIVE = 'Before any visual work (building or restyling a page, template, section, or component), load the `novamira-design` skill and follow it.';
 
+    private const ACTIVE_DESIGN = ' A Novamira design is active; read it with `novamira/get-active-design`.';
+
     private const ASK_LINE_TAIL = ', which has its own design system, and a Novamira design is active. Before visual work, ask the user once whether the builder\'s design system or the Novamira design is authoritative, then follow that choice for the session. Until Novamira is chosen, use existing builder values and do not add Novamira tokens. If it is chosen, create or reuse each token as a native builder variable, palette colour, global/theme style, or class before referencing it — never paste literals or DESIGN.md names into content, never create a parallel token layer.';
 
     private const HYBRID_LINE_TAIL = ', whose own design system (theme styles, variables, palettes, classes, components) stays the source of truth for everything it already defines. Consult the active Novamira design (`novamira/get-active-design`) only to fill gaps the builder has no value for, or when the user explicitly asks to apply it; load the `novamira-design` skill in those cases. Create or reuse each design token as a native builder variable, palette colour, global/theme style, or class before referencing it — never paste literals or DESIGN.md names into content, never create a parallel token layer. Existing builder values win any conflict the user has not decided.';
@@ -69,7 +71,7 @@ final class DesignAuthorityTest extends TestCase
         self::assertSame('design', $withDesign['authority']);
         self::assertTrue($withDesign['authoritative']);
         self::assertNull($withDesign['builder']);
-        self::assertSame(['## Building', '', self::DIRECTIVE], $withDesign['lines']);
+        self::assertSame(['## Building', '', self::DIRECTIVE . self::ACTIVE_DESIGN], $withDesign['lines']);
         self::assertSame(
             ['feature_enabled' => true, 'design_active' => true, 'active_design' => 'brand'],
             $withDesign['filter_context'],
@@ -197,7 +199,7 @@ final class DesignAuthorityTest extends TestCase
 
             self::assertSame('design', $result['authority'], json_encode($value, JSON_THROW_ON_ERROR));
             self::assertNull($result['builder']);
-            self::assertSame(['## Building', '', self::DIRECTIVE], $result['lines']);
+            self::assertSame(['## Building', '', self::DIRECTIVE . self::ACTIVE_DESIGN], $result['lines']);
             self::assertSame(self::fields('design', true, null, true), $result['get_active']);
         }
     }
@@ -214,7 +216,7 @@ final class DesignAuthorityTest extends TestCase
         self::assertSame('design', $forcedOn['authority']);
         self::assertTrue($forcedOn['authoritative']);
         self::assertTrue($forcedOn['authoritative_called']);
-        self::assertSame(['## Building', '', self::DIRECTIVE], $forcedOn['lines']);
+        self::assertSame(['## Building', '', self::DIRECTIVE . self::ACTIVE_DESIGN], $forcedOn['lines']);
         self::assertSame(self::fields('design', true, 'Acme Builder', true), $forcedOn['get_active']);
 
         $falseKeepsLevel = $this->runScenario([
@@ -234,7 +236,7 @@ final class DesignAuthorityTest extends TestCase
         ]);
 
         self::assertSame('design', $falseOnDesign['authority'], 'false is a no-op at the design level');
-        self::assertSame(['## Building', '', self::DIRECTIVE], $falseOnDesign['lines']);
+        self::assertSame(['## Building', '', self::DIRECTIVE . self::ACTIVE_DESIGN], $falseOnDesign['lines']);
 
         $nonBool = $this->runScenario([
             'feature_active' => true,

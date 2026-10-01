@@ -162,10 +162,12 @@ function novamira_design_building_context_lines(): array
         return [];
     }
     if ($resolved['level'] === 'design') {
-        return [
-            '',
-            'Before any visual work (building or restyling a page, template, section, or component), load the `novamira-design` skill and follow it.',
-        ];
+        $directive = 'Before any visual work (building or restyling a page, template, section, or component), load the `novamira-design` skill and follow it.';
+        if (novamira_design_active_slug() !== '') {
+            $directive .= ' A Novamira design is active; read it with `novamira/get-active-design`.';
+        }
+
+        return ['', $directive];
     }
 
     return [

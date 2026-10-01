@@ -1,4 +1,5 @@
 Unreleased
+* Tweak: Novamira Design now tells AI agents when a design is active as soon as they connect, so they read it before starting visual work.
 * Fix: Device-code sign-in can now keep waiting for approval when a client polls at the advertised interval, instead of reaching the site's request limit after a few minutes.
 
 v1.12.6 - 2026/09/28
