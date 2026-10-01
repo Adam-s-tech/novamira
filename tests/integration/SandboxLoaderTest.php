@@ -162,6 +162,17 @@ final class SandboxLoaderTest extends TestCase
         self::assertSame('runner-complete', $secondOutput);
     }
 
+    public function testSafeModeQueryParameterDoesNotSkipSandboxFiles(): void
+    {
+        file_put_contents($this->sandboxDirectory . '/extension.php', "<?php touch(__DIR__ . '/loaded');");
+
+        [$output, $exitCode] = $this->runLoader('safe-mode-query');
+
+        self::assertSame(0, $exitCode);
+        self::assertSame('runner-complete', $output);
+        self::assertFileExists($this->sandboxDirectory . '/loaded');
+    }
+
     public function testDisabledSidecarPreventsLoadingWithoutRenamingPhpSource(): void
     {
         $source = $this->sandboxDirectory . '/extension.php';

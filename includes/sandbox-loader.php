@@ -128,11 +128,6 @@ function novamira_sandbox_crash_handler(string $crashed_file, ?string $current_s
     // Crash recovery: .crashed exists → stay in safe mode.
     $is_safe_mode = file_exists($crashed_file);
 
-    // Manual safe mode via URL parameter.
-    if (!$is_safe_mode && ($_GET['novamira_safe_mode'] ?? null) === '1') {
-        $is_safe_mode = true;
-    }
-
     // Dashboard warnings.
     add_action('admin_notices', static function () use ($crashed_file) {
         if (!novamira_current_user_can_manage() || !novamira_admin_ui_visible()) {

@@ -42,6 +42,10 @@ if ($argv[2] === 'prepare') {
 // Stands in for a response that is already being buffered while sandbox files load: WordPress and
 // several hosts keep an output buffer open across the request. The loader must leave that buffer,
 // and only that buffer, exactly as it found it.
+if ($argv[2] === 'safe-mode-query') {
+    $_GET['novamira_safe_mode'] = '1';
+}
+
 $buffered = $argv[2] === 'buffered-request';
 if ($buffered) {
     ob_start();
