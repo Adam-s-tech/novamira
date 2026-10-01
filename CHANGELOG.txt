@@ -1,7 +1,8 @@
-Unreleased
+v1.12.7 - 2026/10/01
 * Tweak: Novamira Design now tells AI agents when a design is active as soon as they connect, so they read it before starting visual work.
 * Fix: Device-code sign-in can now keep waiting for approval when a client polls at the advertised interval, instead of reaching the site's request limit after a few minutes.
 * Fix: Gutenberg changes queued by AI agents can no longer replace a page with a version that has lost most of its text or images. The change stops before saving and the agent is told to send the full content, where it previously finished with the text emptied.
+* Minor Fixes
 
 v1.12.6 - 2026/09/28
 * Tweak: The sandbox safe mode notice now explains in plain words what happened and includes a ready-to-paste prompt for your AI to fix the problem, with a link to the Sandbox page for those who prefer to do it by hand.
