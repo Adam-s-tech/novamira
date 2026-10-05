@@ -380,8 +380,22 @@ function novamira_build_connector_install_link(string $mcp_url, string $connecto
  */
 function novamira_build_connector_display_name(string $site_name): string
 {
-    $site_name = novamira_plain_site_name($site_name);
+    $site_name = novamira_unbranded_site_name($site_name);
     return $site_name !== '' ? 'Novamira - ' . $site_name : 'Novamira';
+}
+
+/**
+ * Plain site name without a leading "Novamira", for names that already start with it.
+ */
+function novamira_unbranded_site_name(string $site_name): string
+{
+    $site_name = novamira_plain_site_name($site_name);
+    $unbranded = preg_replace(
+        pattern: '/^novamira(?![\p{L}\p{N}])[\s\x{00A0}\x{2013}\x{2014}-]*/iu',
+        replacement: '',
+        subject: $site_name,
+    );
+    return $unbranded ?? $site_name;
 }
 
 /**

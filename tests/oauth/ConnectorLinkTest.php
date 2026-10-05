@@ -50,6 +50,8 @@ final class ConnectorLinkTest extends TestCase
         self::assertSame('Novamira - A & B', novamira_build_connector_display_name('A &amp; B'));
         self::assertSame('Novamira', novamira_build_connector_display_name('   '));
         self::assertSame('Novamira', novamira_build_connector_display_name('&nbsp;'));
+        self::assertSame('Novamira - Demo', novamira_build_connector_display_name('Novamira Demo'));
+        self::assertSame('Novamira', novamira_build_connector_display_name('Novamira'));
     }
 
     public function testInvalidUtf8SiteNameFallsBackToByteSafeTrim(): void

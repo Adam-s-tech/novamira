@@ -118,6 +118,26 @@ final class ConnectPageNameTest extends TestCase
         self::assertSame('', novamira_plain_site_name('&nbsp;'));
     }
 
+    public function testDefaultServerNameKeepsASingleNovamira(): void
+    {
+        self::assertSame('novamira-122-domain-com', self::serverNameForUrl('https://novamira122.domain.com/'));
+        self::assertSame('novamira-yourdomainname-c', self::serverNameForUrl('https://novamira.yourdomainname.com/'));
+        self::assertSame(
+            'novamira-visual-122-domai',
+            novamira_build_mcp_server_name_default('novamira122.domain.com', null, '', prefix: 'novamira-visual-'),
+        );
+    }
+
+    public function testUnbrandedSiteNameDropsLeadingNovamira(): void
+    {
+        self::assertSame('Demo', novamira_unbranded_site_name('Novamira Demo'));
+        self::assertSame('Demo', novamira_unbranded_site_name('novamira | Demo'));
+        self::assertSame('Demo', novamira_unbranded_site_name('Novamira — Demo'));
+        self::assertSame('', novamira_unbranded_site_name('Novamira'));
+        self::assertSame('Novamiradesign', novamira_unbranded_site_name('Novamiradesign'));
+        self::assertSame('Demo Novamira', novamira_unbranded_site_name('Demo Novamira'));
+    }
+
     public function testPlainSiteNameReplacesCharactersInvalidInWindowsFileNames(): void
     {
         self::assertSame('Acme - Shop', novamira_plain_site_name('Acme | Shop'));

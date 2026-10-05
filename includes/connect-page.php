@@ -216,12 +216,13 @@ function novamira_build_mcp_server_name_default(
         replacement: '',
         subject: $site_host,
     ));
+    $site_slug = ltrim((string) preg_replace('/^novamira/', replacement: '', subject: $site_slug), characters: '-');
 
     $site_path = trim($site_path, characters: '/');
     if ($site_path === '') {
         $site_slug = substr($site_slug, offset: 0, length: $slug_budget);
         $site_slug = rtrim($site_slug, characters: '-');
-        return $prefix . $site_slug;
+        return $site_slug !== '' ? $prefix . $site_slug : rtrim($prefix, characters: '-');
     }
 
     $path_slug = novamira_mcp_server_name_slug($site_path);
@@ -2059,7 +2060,7 @@ function novamira_build_mcpb_manifest(
         $env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
     }
 
-    $site_name = novamira_plain_site_name(get_bloginfo('name'));
+    $site_name = novamira_unbranded_site_name(get_bloginfo('name'));
     $display_name = $site_name !== '' ? 'Novamira — ' . $site_name : 'Novamira';
 
     return [

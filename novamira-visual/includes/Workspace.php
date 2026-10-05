@@ -286,7 +286,7 @@ class Workspace
      */
     private function build_mcpb_manifest(string $workspace_url, string $server_name): array
     {
-        $site_name = \novamira_plain_site_name((string) \get_bloginfo('name'));
+        $site_name = \novamira_unbranded_site_name((string) \get_bloginfo('name'));
         $display_name = $site_name !== '' ? 'Novamira Visual: ' . $site_name : 'Novamira Visual';
 
         return [
