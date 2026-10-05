@@ -1,3 +1,6 @@
+Unreleased
+* Fix: The Claude Desktop bundle now installs on Windows when the site title contains characters such as | or :, which are replaced with a hyphen in the connector name.
+
 v1.12.7 - 2026/10/01
 * Tweak: Novamira Design now tells AI agents when a design is active as soon as they connect, so they read it before starting visual work.
 * Fix: Device-code sign-in can now keep waiting for approval when a client polls at the advertised interval, instead of reaching the site's request limit after a few minutes.

@@ -118,6 +118,19 @@ final class ConnectPageNameTest extends TestCase
         self::assertSame('', novamira_plain_site_name('&nbsp;'));
     }
 
+    public function testPlainSiteNameReplacesCharactersInvalidInWindowsFileNames(): void
+    {
+        self::assertSame('Acme - Shop', novamira_plain_site_name('Acme | Shop'));
+        self::assertSame('A-B-C-D', novamira_plain_site_name('A/B\\C:D'));
+        self::assertSame('Q-A', novamira_plain_site_name('"Q?" <A*>'));
+        self::assertSame('Line one two', novamira_plain_site_name("Line one\ntwo"));
+        self::assertSame('Well-known', novamira_plain_site_name('Well-known'));
+        self::assertSame('nome-del-sito', novamira_plain_site_name('nome/|\\del-sito'));
+        self::assertSame('nome-del-sito', novamira_plain_site_name('nome-|-del-sito'));
+        self::assertSame('Acme - Shop', novamira_plain_site_name('Acme | | Shop'));
+        self::assertSame('', novamira_plain_site_name(' | '));
+    }
+
     private static function serverNameForUrl(string $site_url): string
     {
         $site = novamira_parse_mcp_server_site_url($site_url);

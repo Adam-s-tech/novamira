@@ -385,12 +385,21 @@ function novamira_build_connector_display_name(string $site_name): string
 }
 
 /**
- * Decode a WordPress site name for use in plain-text client metadata.
+ * Decode a WordPress site name for use in plain-text client metadata. Characters that are
+ * not valid in Windows file names become hyphens, since clients may name files after it.
  */
 function novamira_plain_site_name(string $site_name): string
 {
     $site_name = html_entity_decode($site_name, flags: ENT_QUOTES | ENT_HTML5, encoding: 'UTF-8');
-    $trimmed = preg_replace(pattern: '/^(?:\s|\x{00A0})+|(?:\s|\x{00A0})+$/u', replacement: '', subject: $site_name);
+    $site_name = (string) preg_replace('/[\x00-\x1F]+/', replacement: ' ', subject: $site_name);
+    $site_name = (string) preg_replace('/[<>:"\/\\\\|?*]+/', replacement: '-', subject: $site_name);
+    $site_name = (string) preg_replace('/-(?:[ -]*-)?/', replacement: '-', subject: $site_name);
+    $site_name = (string) preg_replace('/ {2,}/', replacement: ' ', subject: $site_name);
+    $trimmed = preg_replace(
+        pattern: '/^(?:\s|\x{00A0}|-)+|(?:\s|\x{00A0}|-)+$/u',
+        replacement: '',
+        subject: $site_name,
+    );
     return $trimmed ?? trim($site_name);
 }
 
